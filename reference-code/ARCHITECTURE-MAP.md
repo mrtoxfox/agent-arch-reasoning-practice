@@ -24,8 +24,9 @@ You do not need to build it (the build is premake5 / Visual Studio 2022). Read t
 - `network-library/Engine/src/ecs/`: the ECS world (`entity_container`, `archetype`,
   `system_coordinator`). All match state lives here, in memory.
 - `network-library/DemoGame/src/server/`: the server-authoritative game systems
-  (`player_simulation/`, `hit_reg/` with `server_transform_history_component` for lag-compensated
-  rewind, `systems/`). The server simulates; clients send inputs, predict, and reconcile.
+  (`player_simulation/`, `systems/server_hit_registration_system.cpp` for lag-compensated rewind
+  against `components/server_transform_history_component.h`, plus `hit_reg/`). The server simulates;
+  clients send inputs, predict, and reconcile.
 - `network-library/NetworkLibrary/src/replication/`: snapshot replication
   (`replication_manager`, `network_entity_storage`, `network_variable*`). Every connected client
   receives every networked entity. There is no area-of-interest filtering, so bandwidth and CPU

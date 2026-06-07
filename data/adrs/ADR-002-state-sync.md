@@ -16,7 +16,7 @@ We needed a model for how match state moves between the server and clients.
 3. **Peer-to-peer with host migration**: no server cost, but the host can cheat and migration is fragile.
 
 ## Decision
-Authoritative server on a fixed 30 Hz tick. Clients send inputs; the server steps the
+Authoritative server on a fixed 50 Hz tick. Clients send inputs; the server steps the
 custom archetype ECS world and broadcasts a full world snapshot each tick. Clients interpolate
 remote entities, predict the local player, and reconcile against the authoritative snapshot.
 The server resolves shots with lag-compensated hit registration: it keeps a short per-entity

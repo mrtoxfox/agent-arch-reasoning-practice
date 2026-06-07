@@ -27,7 +27,7 @@ Whatever we change under the hood, the game must feel the same or better.
 
 ### The business context
 Read `../data/context/company.md` for numbers, stack, team size, and budget.
-Key facts: ~1,800 peak players, 30 Hz tick, 5v5, four-person team, Q4 launch with the netcode
+Key facts: ~1,800 peak players, 50 Hz tick, 5v5, four-person team, Q4 launch with the netcode
 and fleet rework as the headline work.
 
 ### Your concerns

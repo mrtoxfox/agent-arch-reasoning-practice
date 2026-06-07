@@ -10,7 +10,7 @@ Founded in 2023, single-region launch, growing through closed beta.
 - 26,000 registered players (closed beta)
 - 1,800 peak concurrent players
 - ~180 live matches at peak (5v5)
-- Server tick rate: 30 Hz
+- Server tick rate: 50 Hz
 - Average match length: 9 min
 - 64% of matches are ranked (competitive integrity matters)
 
@@ -20,7 +20,7 @@ Founded in 2023, single-region launch, growing through closed beta.
 - Best case at launch: north of 20,000 concurrent players if the tech holds
 
 ## Current Technology Stack
-- Server: single authoritative C++ game server (fixed 30 Hz tick, custom archetype ECS world)
+- Server: single authoritative C++ game server (fixed 50 Hz tick, custom archetype ECS world)
 - Transport: in-house UDP reliability layer (custom acks, retransmit, channels)
 - State sync: full world snapshots, client prediction and reconciliation, lag-compensated hit registration
 - Client: C++ game client

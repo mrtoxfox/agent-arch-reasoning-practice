@@ -27,7 +27,7 @@ graph TD
 
     subgraph Box["Single authoritative server process: one box, one region (EU)"]
         direction TB
-        S1["Fixed 30 Hz tick loop<br>PreTick → Tick → PosTick"]
+        S1["Fixed 50 Hz tick loop<br>PreTick → Tick → PosTick"]
         S2["Custom archetype ECS world<br>all live match state in memory"]
         S3["Server systems<br>player simulation, lag-compensated hit reg (transform history)"]
         S4["Replication manager<br>full world snapshot to every client, every tick"]

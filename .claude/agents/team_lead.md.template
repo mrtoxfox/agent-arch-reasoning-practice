@@ -31,7 +31,7 @@ You want the scaling work to protect the player experience:
 
 ### The business context
 - Breakline peaks at ~1,800 concurrent players across ~180 live 5v5 matches.
-- The server runs a fixed 30 Hz authoritative tick; rubber-banding shows up at peak.
+- The server runs a fixed 50 Hz authoritative tick; rubber-banding shows up at peak.
 - The netcode and fleet rework is the headline work for the Q4 open beta and paid launch.
 - Budget headroom: ~€1,500/month additional infra.
 
