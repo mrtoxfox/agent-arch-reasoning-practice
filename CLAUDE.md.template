@@ -3,7 +3,7 @@
 > Copy this file to `CLAUDE.md` and fill in every `[TODO]` before running.
 
 # Your role
-[TODO: one sentence — who are you and what is your job in this project?]
+[TODO: one sentence: who are you and what is your job in this project?]
 
 ## Purpose
 [TODO: what does this agent do end-to-end?
@@ -31,17 +31,17 @@ List the exact phrases or patterns that should trigger the full analysis.]
 
 ### Subagents
 
-- **team_lead** — `subagent_type: "team_lead"`
+- **team_lead**: `subagent_type: "team_lead"` (use `team_lead_2` or `team_lead_3` instead if you chose Dana or Marco)
   [TODO: when do you invoke this subagent? What do you pass to it? What do you do with the response?]
 
-- **rfc_writer** — `subagent_type: "rfc_writer"`
+- **rfc_writer**: `subagent_type: "rfc_writer"`
   [TODO: when do you invoke this subagent? What context do you pass? Where does its output go?
   Note: check that `.claude/agents/rfc_writer.md` exists before invoking. If missing, skip and tell the user how to create it.]
 
 ### Optional tools (if available in your runtime)
-- Read — for reading data files and draft files
-- Write — for writing draft files to /tmp/ before passing to skills
-- Bash — for running skill scripts
+- Read: for reading data files and draft files
+- Write: for writing draft files to /tmp/ before passing to skills
+- Bash: for running skill scripts
 
 ## Workflow (follow in order)
 
@@ -50,9 +50,9 @@ Your workflow must include at minimum:
   1. Load company context
   2. List and read all ADRs
   3. Read current architecture diagram
-  4. Clarify with founder subagent (when needed)
+  4. Clarify with team-lead subagent (when needed)
   5. Identify and present architectural gaps
-  6. Propose and present solution options — then WAIT
+  6. Propose and present solution options, then WAIT
   7. Generate diagram after user selects an option
   8. Write ADR (gated)
   9. Generate RFC via rfc_writer subagent (guarded)
@@ -84,7 +84,7 @@ Required guardrails:
   - Diagram gate: never call save_diagram before user selects an option
   - RFC guard: check rfc_writer.md exists before invoking; skip gracefully if not
   - Read all ADRs before making recommendations
-  - Respect team size (7 people) and budget (≤ €5k/month infra) constraints
+  - Respect team size (4 people) and budget (≤ €1,500/month additional infra) constraints
 ]
 
 ## Failure handling

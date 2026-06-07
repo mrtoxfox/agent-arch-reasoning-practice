@@ -1,16 +1,16 @@
-# Practice — Building an Architecture Reasoning Agent
+# Practice: Building an Architecture Reasoning Agent
 
-In this practice you will build agents from scratch: an engineering team lead chatbot, an architecture reasoning orchestrator, and an RFC writer subagent. The tools and data are provided — your job is to write the agent instructions.
+In this practice you will build agents from scratch: a team lead chatbot, an architecture reasoning orchestrator, and an RFC writer subagent. The tools and data are provided. Your job is to write the agent instructions.
 
-The target codebase is the **Conduit RealWorld** app (`conduit-realworld-example-app/`), a Medium-clone with a Node.js/Express backend, Sequelize + PostgreSQL, and a React/Vite frontend.
+The target codebase is **Network-Library** (`reference-code/network-library`), a real C++ authoritative multiplayer game server: a custom archetype ECS world, a fixed-tick loop, a hand-rolled UDP reliability layer, and snapshot replication with client prediction and reconciliation. It is the kind of server **Tidebreak Studios** runs for its 5v5 competitive shooter **Breakline**.
 
-Three team lead personas are provided — each requests a different feature. Pick one to start:
+Three team lead personas are provided. They all want the same thing, the netcode and server-scaling rework done before the Q4 launch, but each pushes on it from a different angle. Pick one to start:
 
-| Persona | Directory | Feature requested |
+| Persona | Directory | Role and concern |
 |---------|-----------|-------------------|
-| **Alex Chen** | `team-lead/` | Real-time collaborative article editing (WebSockets + OT) |
-| **Marcus Webb** | `team-lead-2/` | AI-powered personalized article feed (recommendation engine) |
-| **Priya Sharma** | `team-lead-3/` | Premium subscription paywall + writer revenue share (Stripe) |
+| **Sam Rivera** | `team-lead/` | Gameplay lead: game feel, fairness, no desync or rubber-banding |
+| **Dana Okoye** | `team-lead-2/` | Infrastructure lead: fleet cost, ops load, reliability |
+| **Marco Bianchi** | `team-lead-3/` | Producer: Q4 launch date, cross-region ping complaints, risk |
 
 ---
 
@@ -18,20 +18,21 @@ Three team lead personas are provided — each requests a different feature. Pic
 
 ```
 arch-reasoning-agent-practice/
-├── conduit-realworld-example-app/         ← the real codebase under analysis
-│   ├── backend/                           ← Express + Sequelize + PostgreSQL
-│   └── frontend/                          ← React + Vite SPA
+├── reference-code/
+│   ├── network-library/                ← the real C++ authoritative server (git submodule)
+│   └── ARCHITECTURE-MAP.md             ← which files show each ADR trap
 │
 ├── data/
-│   ├── context/company.md             ← Conduit platform: business context, pain points, constraints
+│   ├── context/company.md              ← Tidebreak Studios: business context, pain points, constraints
 │   ├── adrs/
-│   │   ├── ADR-001-database.md        ← minimal ADR (intentionally thin)
-│   │   ├── ADR-002-api-design.md      ← well-structured ADR
-│   │   └── ADR-003-deployment.md      ← outdated monolith ADR
+│   │   ├── ADR-001-transport.md        ← thin ADR (hand-rolled UDP transport)
+│   │   ├── ADR-002-state-sync.md       ← well-structured ADR (authoritative tick, the hinge)
+│   │   └── ADR-003-server-topology.md  ← outdated ADR (single process, single region)
 │   └── diagrams/
-│       └── current-architecture.mmd   ← current single-VPS topology (Mermaid)
+│       ├── current-architecture.mmd    ← current server topology (Mermaid)
+│       └── current-architecture.md     ← same diagram embedded in Markdown
 │
-├── skills/                            ← COMPLETE — do not modify
+├── skills/                            ← COMPLETE, do not modify
 │   ├── list_adrs/list_adrs.py         ← lists all ADRs as JSON
 │   ├── read_adr/read_adr.py           ← reads one ADR by ID
 │   ├── write_adr/write_adr.py         ← validates + saves new ADR to output/adrs/
@@ -42,16 +43,16 @@ arch-reasoning-agent-practice/
 │   └── diagrams/                      ← agent writes new diagrams here
 │
 ├── team-lead/
-│   └── CLAUDE.md.template             ← Alex Chen: real-time collaboration
+│   └── CLAUDE.md.template             ← Sam Rivera: gameplay lead
 ├── team-lead-2/
-│   └── CLAUDE.md.template             ← Marcus Webb: AI personalized feed
+│   └── CLAUDE.md.template             ← Dana Okoye: infrastructure lead
 ├── team-lead-3/
-│   └── CLAUDE.md.template             ← Priya Sharma: premium subscriptions
+│   └── CLAUDE.md.template             ← Marco Bianchi: producer
 │
 ├── .claude/agents/
-│   ├── team_lead.md.template          ← Alex Chen subagent (used by main agent)
-│   ├── team_lead_2.md.template        ← Marcus Webb subagent (used by main agent)
-│   ├── team_lead_3.md.template        ← Priya Sharma subagent (used by main agent)
+│   ├── team_lead.md.template          ← Sam Rivera subagent (used by main agent)
+│   ├── team_lead_2.md.template        ← Dana Okoye subagent (used by main agent)
+│   ├── team_lead_3.md.template        ← Marco Bianchi subagent (used by main agent)
 │   └── rfc_writer.md.template         ← Step 4: build the RFC writer subagent
 │
 ├── CLAUDE.md.template                 ← Step 3: build the architecture reasoning agent
@@ -60,30 +61,31 @@ arch-reasoning-agent-practice/
 
 ---
 
-## Step 0 — Setup
+## Step 0: Setup
 
-Verify the skills work:
+Pull the reference codebase (a git submodule) and verify the skills work:
 
 ```bash
+git submodule update --init --recursive
 python skills/list_adrs/list_adrs.py
 python skills/read_adr/read_adr.py ADR-001
 ```
 
-Read `data/context/company.md` to understand the scenario, then browse `conduit-realworld-example-app/backend/` to see the actual code the agent will reason about.
+Read `data/context/company.md` to understand the setup, then browse `reference-code/network-library/` to see the actual code the agent will reason about. Use `reference-code/ARCHITECTURE-MAP.md` as your guide: it points at the exact files where each ADR trap shows up (the hand-rolled transport, the fixed-tick loop, the full-state replication, the single-process topology).
 
 ---
 
-## Step 1 — Build a Team Lead chatbot
+## Step 1: Build a Team Lead chatbot
 
 Three personas are available. Pick one (or build all three for extra practice).
 
-| Persona | Feature | Templates to copy |
-|---------|---------|-------------------|
-| Alex Chen | Real-time collab editing | `team-lead/CLAUDE.md.template` → `team-lead/CLAUDE.md`<br>`.claude/agents/team_lead.md.template` → `.claude/agents/team_lead.md` |
-| Marcus Webb | AI personalized feed | `team-lead-2/CLAUDE.md.template` → `team-lead-2/CLAUDE.md`<br>`.claude/agents/team_lead_2.md.template` → `.claude/agents/team_lead_2.md` |
-| Priya Sharma | Premium subscriptions | `team-lead-3/CLAUDE.md.template` → `team-lead-3/CLAUDE.md`<br>`.claude/agents/team_lead_3.md.template` → `.claude/agents/team_lead_3.md` |
+| Persona | Angle | Templates to copy |
+|---------|-------|-------------------|
+| Sam Rivera | Game feel and fairness | `team-lead/CLAUDE.md.template` → `team-lead/CLAUDE.md`<br>`.claude/agents/team_lead.md.template` → `.claude/agents/team_lead.md` |
+| Dana Okoye | Fleet cost and ops | `team-lead-2/CLAUDE.md.template` → `team-lead-2/CLAUDE.md`<br>`.claude/agents/team_lead_2.md.template` → `.claude/agents/team_lead_2.md` |
+| Marco Bianchi | Launch date and risk | `team-lead-3/CLAUDE.md.template` → `team-lead-3/CLAUDE.md`<br>`.claude/agents/team_lead_3.md.template` → `.claude/agents/team_lead_3.md` |
 
-Each persona already has content filled in — the templates are complete, not blank. Read them, then optionally customise before running.
+Each persona already has content filled in. The templates are complete, not blank. Read them, then optionally customise before running.
 
 Test the standalone chatbot for your chosen persona:
 
@@ -93,27 +95,27 @@ claude
 ```
 
 **Good opening questions by persona:**
-- Alex: *"What exactly should two writers be able to do at the same time?"*
-- Marcus: *"What data do you have today that a recommendation engine could use?"*
-- Priya: *"What happens if we charge a reader and the server crashes before we record it?"*
+- Sam: *"What exactly has to still feel the same after we change the netcode?"*
+- Dana: *"What does running a second server actually cost us, and who operates it at 2am?"*
+- Marco: *"What is the smallest change that helps the ping complaints before Q4?"*
 
-The team lead should answer in product/delivery language and push back when proposals sound complex or slow to ship.
+The team lead should answer in product and delivery language and push back when proposals sound complex, risky, or slow to ship.
 
 ---
 
-## Step 2 — Read and analyse the existing ADRs
+## Step 2: Read and analyse the existing ADRs
 
 Before building the agent, spend 10 minutes reading the three ADRs in `data/adrs/` manually.
 
-- What was decided and when?
-- Which ADR explicitly flags that real-time features need a different transport layer?
-- What does ADR-003 warn about for multi-process WebSocket deployments?
+- What was decided and when, and which assumptions no longer hold at beta scale?
+- Which ADR is the hinge that flags the real scaling limit (full-state replication), and which one is intentionally thin?
+- What does ADR-003 warn about before you run more than one server process?
 
 This shapes the requirements section of your agent.
 
 ---
 
-## Step 3 — Build the Architecture Reasoning Agent
+## Step 3: Build the Architecture Reasoning Agent
 
 This is the main agent. It reads ADRs, identifies gaps, proposes options, generates diagrams, and writes new ADRs.
 
@@ -153,9 +155,9 @@ Send: `analyse the architecture`
 
 Confirm it:
 - Reads `company.md` and all 3 ADRs
-- Identifies at least 3 architectural gaps related to the real-time collaboration feature
-- Proposes 2–3 options with cost estimates and timelines
-- **Waits** — does not call `write_adr` or `save_diagram` yet
+- Identifies at least 3 architectural gaps related to scaling the single game server into a fleet
+- Proposes 2-3 options with cost estimates and timelines
+- **Waits**: does not call `write_adr` or `save_diagram` yet
 
 4. Drive it through the full flow:
    - Select an option → diagram should be saved to `output/diagrams/`
@@ -163,7 +165,7 @@ Confirm it:
 
 ---
 
-## Step 4 — Add the RFC writer subagent
+## Step 4: Add the RFC writer subagent
 
 After the agent writes an ADR, it should produce a complete RFC document that combines everything: requirements, architecture, ADRs, diagram, and migration plan.
 
@@ -196,13 +198,13 @@ cp .claude/agents/rfc_writer.md.template .claude/agents/rfc_writer.md
 
 ## Setting up the Mermaid diagram plugin
 
-The architecture agent can render and live-preview Mermaid diagrams in your browser using the **claude-mermaid** Claude Code plugin. This is optional but recommended — without it the agent can still write `.mmd` files, but you won't get live previews.
+The architecture agent can render and live-preview Mermaid diagrams in your browser using the **claude-mermaid** Claude Code plugin. This is optional but recommended. Without it the agent can still write `.mmd` files, but you will not get live previews.
 
 The plugin is hosted on GitHub and must be registered as a custom marketplace source before installation.
 
 ### 1. Register the marketplace source
 
-Add the following to your **user-level** Claude Code settings (`~/.claude/settings.json`). Create the file if it doesn't exist; merge with your existing config if it does.
+Add the following to your **user-level** Claude Code settings (`~/.claude/settings.json`). Create the file if it does not exist; merge with your existing config if it does.
 
 ```json
 {
@@ -257,23 +259,23 @@ The `.claude/settings.json` in this repo already pre-approves the two mermaid to
 
 - [ ] At least one team lead `CLAUDE.md` exists in `team-lead/`, `team-lead-2/`, or `team-lead-3/`
 - [ ] Matching `.claude/agents/team_lead*.md` file exists for your chosen persona
-- [ ] Team lead chatbot responds in delivery/product language (test: propose something complex — they should push back on scope or timeline)
-- [ ] `CLAUDE.md` exists — no `[TODO]` tokens remain
+- [ ] Team lead chatbot responds in delivery and product language (test: propose something complex, they should push back on scope, cost, or risk)
+- [ ] `CLAUDE.md` exists, no `[TODO]` tokens remain
 - [ ] ADR write gate present in `CLAUDE.md`
 - [ ] Diagram gate present in `CLAUDE.md`
 - [ ] Agent reads all 3 ADRs before proposing options
-- [ ] Agent presents 2–3 options and **waits** before writing anything
+- [ ] Agent presents 2-3 options and **waits** before writing anything
 - [ ] `output/diagrams/` contains a generated diagram
 - [ ] `output/adrs/` contains a generated ADR
-- [ ] `.claude/agents/rfc_writer.md` exists — no `[TODO]` tokens remain
+- [ ] `.claude/agents/rfc_writer.md` exists, no `[TODO]` tokens remain
 - [ ] `output/rfc.md` exists after full workflow run
 
 ---
 
 ## Tips
 
-- Read `data/context/company.md` carefully — your agent's gap analysis should map directly to the pain points described there, especially the single-VPS constraint that affects WebSocket scaling.
-- Browse `conduit-realworld-example-app/backend/` — the agent should be able to reason about what the real code actually does, not just the company doc.
+- Read `data/context/company.md` carefully. Your agent's gap analysis should map directly to the pain points described there, especially the single-process and single-region constraint that blocks naive horizontal scaling.
+- Browse `reference-code/network-library/` with `ARCHITECTURE-MAP.md` open. The agent should reason about what the real code actually does (hand-rolled UDP transport, full-state replication, one authoritative process), not just the company doc.
 - The write gate is the most important guardrail. Test that the agent does **not** call `write_adr` when you say "looks good" or "I approve".
 - If the agent skips a step, add more explicit ordering language to the workflow section ("do not proceed to step N until step N-1 is complete").
 - For Cursor or Windsurf: use the same template content, saved to `.cursor/rules/architecture-agent.mdc` or `.windsurfrules` respectively. For the Team Lead, open `team-lead/` as a separate workspace root.

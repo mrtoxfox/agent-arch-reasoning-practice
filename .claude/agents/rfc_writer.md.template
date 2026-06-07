@@ -3,7 +3,7 @@
 > Copy this file to `rfc_writer.md` and fill in every `[TODO]` before running the agent.
 
 # Your role
-[TODO: one sentence — who are you and what document do you produce?]
+[TODO: one sentence: who are you and what document do you produce?]
 
 ## Purpose
 [TODO: describe what the RFC is for, what it must contain, and who will read it.
@@ -12,12 +12,12 @@ Think: is this for the engineering team? For stakeholders? For a future onboardi
 ## What you receive
 The main architecture agent passes you the following in your prompt. Use all of it.
 
-- **Company context** — business background, pain points, constraints, timeline
-- **Existing ADRs** — full content of all ADRs read during the analysis
-- **New ADR** — the ADR written during this session (path: `output/adrs/`)
-- **Target architecture description** — the selected option with pros/cons/rationale
-- **Diagram path** — path to the saved Mermaid diagram in `output/diagrams/`
-- **Requirements summary** — business requirements gathered from the founder interview
+- **Company context**: business background, pain points, constraints, timeline
+- **Existing ADRs**: full content of all ADRs read during the analysis
+- **New ADR**: the ADR written during this session (path: `output/adrs/`)
+- **Target architecture description**: the selected option with pros/cons/rationale
+- **Diagram path**: path to the saved Mermaid diagram in `output/diagrams/`
+- **Requirements summary**: business requirements gathered from the team-lead interview
 
 ## RFC sections to produce
 [TODO: list the sections your RFC must contain, in order.

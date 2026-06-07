@@ -1,3 +1,12 @@
+# Current Architecture (Breakline game server)
+
+Detailed view of the current server, built on the real Network-Library shape. The three highlighted zones are the ADR traps the workshop's scaling work would change; everything else stays as is.
+
+- 🟠 **orange** = the hand-rolled UDP transport: no congestion control, no payload encryption (ADR-001; Sam's fairness worry, Dana's maintenance burden)
+- 🔵 **blue** = full-snapshot replication, the bandwidth wall: no delta, no interest management (ADR-002; Sam's game feel under load)
+- 🔴 **red** = single process, one region, no matchmaker: the single point of failure and the reason you cannot just add servers (ADR-003; Dana's ops, Marco's launch and ping complaints)
+
+```mermaid
 graph TD
     subgraph Client["Game Client (C++)"]
         direction TB
@@ -51,3 +60,4 @@ graph TD
 
     style Net fill:#fff6ec,stroke:#e65100,stroke-width:2px,stroke-dasharray:5 3;
     style Box fill:#fff0f0,stroke:#cc0000,stroke-width:2px;
+```

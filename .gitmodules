@@ -1,0 +1,3 @@
+[submodule "reference-code/network-library"]
+	path = reference-code/network-library
+	url = https://github.com/DanielJimenezMorales/Network-Library.git

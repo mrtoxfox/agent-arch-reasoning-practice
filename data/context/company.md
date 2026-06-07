@@ -1,64 +1,63 @@
-# Conduit — Company Context
+# Tidebreak Studios: Company Context
 
 ## What We Do
-Conduit is an open publishing platform where writers create and share articles,
-readers follow authors and curate feeds, and community members discuss ideas through comments.
-Think of it as a lean, indie version of Medium.
-Founded in 2022, single-region deployment, growing steadily.
+Tidebreak Studios makes Breakline, a session-based competitive online shooter:
+two teams of five drop into a match and the last team standing wins the round.
+Fast rounds, tight aim, ranked ladders.
+Founded in 2023, single-region launch, growing through closed beta.
 
 ## Current Numbers
-- 14,000 registered users
-- 2,600 articles published per month
-- 52,000 monthly active readers
-- 480 comments per day
-- Average session length: 6 min
-- 70% of traffic is unauthenticated (SEO / read-only)
+- 26,000 registered players (closed beta)
+- 1,800 peak concurrent players
+- ~180 live matches at peak (5v5)
+- Server tick rate: 30 Hz
+- Average match length: 9 min
+- 64% of matches are ranked (competitive integrity matters)
 
 ## Growth Trajectory
-- Month-over-month registered-user growth: 18%
-- Article output growing 22% MoM since the writer program launched
-- Planning to introduce a premium tier (paid subscriptions for authors) in Q3
+- Wishlists growing 20% month over month since the beta trailer
+- Open beta and paid launch planned for Q4
+- Best case at launch: north of 20,000 concurrent players if the tech holds
 
 ## Current Technology Stack
-- Backend: Node.js monolith (Express.js + Sequelize ORM)
-- Database: Single PostgreSQL 15 instance (models: User, Article, Comment, Tag)
-- Frontend: React + Vite SPA, served via the same VPS
-- Auth: JWT (stateless, no refresh tokens yet)
-- Hosting: Single VPS — €120/month
-- No dedicated CDN, no cache layer, no message queue
+- Server: single authoritative C++ game server (fixed 30 Hz tick, custom archetype ECS world)
+- Transport: in-house UDP reliability layer (custom acks, retransmit, channels)
+- State sync: full world snapshots, client prediction and reconciliation, lag-compensated hit registration
+- Client: C++ game client
+- Hosting: one bare-metal box, one region (EU)
 
 ## Engineering Team
-- 2 backend developers (Node.js, some Python)
-- 1 frontend developer (React)
-- 1 DevOps / part-time infra engineer
-- No dedicated SRE or data engineering
+- 2 gameplay / engine programmers (C++)
+- 1 client programmer
+- 1 part-time backend / infra engineer
+- No dedicated netcode-at-scale or SRE experience
 
 ## Infrastructure Budget
-- Current spend: ~€280/month
-- Approved budget for new features: up to €1,200/month additional
+- Current spend: ~€300/month
+- Approved budget for scaling: up to €1,500/month additional
 
 ## Known Pain Points (Business Impact)
 
-1. **No real-time collaboration** — Writers cannot co-author an article simultaneously.
-   Co-authors must pass a Google Doc back and forth, then paste the final version.
-   Several power users have complained this is the #1 missing feature.
+1. **One process holds every match.** A single server runs all live matches.
+   At peak it is CPU-bound, tick time spikes, and players rubber-band.
 
-2. **No draft auto-save** — If a writer closes the tab, their draft is lost.
-   Support tickets about lost work: ~30/month.
+2. **One crash drops everyone.** A single fault ends every live match at once.
+   No isolation between matches, no failover.
 
-3. **Feed latency at peak** — The personalised article feed re-queries PostgreSQL
-   on every page load. p95 latency hits 1.8 s on weekday mornings.
+3. **No matchmaking.** Players join through a basic queue with no skill matching
+   and no routing to a free server. Ranked feels unfair.
 
-4. **No media storage** — Articles cannot embed images hosted by Conduit.
-   Writers must paste external URLs, which rot over time.
+4. **Single region.** One EU box. Players in NA and Asia see 150-250 ms ping.
+   This is the number one community complaint.
 
-5. **Auth session length** — JWT access tokens never expire.
-   Security team flagged this; any leaked token is valid forever.
+5. **Bandwidth grows with players.** The server sends a full snapshot to every
+   client each tick. Bandwidth and CPU climb with match size, so 5v5 is the ceiling.
 
-6. **Tag search is a full-table scan** — No index on tags.
-   As the tag table grows the search endpoint degrades linearly.
+6. **Hand-rolled transport.** The in-house UDP layer has no congestion control
+   and no payload encryption (only a salt-based connection check, no packet crypto).
+   Packet loss causes hitches, and the team owns every bug.
 
 ## Timeline
-- Premium tier (paid subscriptions) launch: Q3 — hard deadline, marketing committed.
-- Real-time collaboration MVP: Q4 goal, team lead is pushing hard.
-- Image hosting: backlog, no firm date.
+- Open beta and paid launch: Q4, hard deadline, marketing committed.
+- Fleet plus matchmaking MVP: required before launch, team lead is pushing hard.
+- Cross-region play: backlog, heavy community pressure, no firm date.
